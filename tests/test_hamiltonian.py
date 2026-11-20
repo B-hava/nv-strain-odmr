@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 from src.hamiltonian import hamiltonian
 
+# testing with random arbitrary values close to 0 to check if the hamiltonian matches the closed form of eq. 8
+
 D = 2.870 #GHz
 gamma = 0.028 #GHz
 
