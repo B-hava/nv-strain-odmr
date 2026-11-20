@@ -295,3 +295,14 @@ Write the nonlinear least-squares fitting code (likely scipy.optimize.curve_fit 
   (MW field direction: TV-plane vs along L) still unresolved; next step
   is forward-simulating with Fig.4's known strain values under a few
   candidate directions and comparing against the published curves.
+## Ensemble validation, fitting & 2.49 um milestone — 20/11/26
+- Cleaned up `src/lineshape.py` (`D_val=D` argument on `ensemble_lineshape`, input validation) and added `tests/test_lineshape.py` (Lorentzian properties, baseline=1.0, zero-strain, volumetric-strain single-dip collapse, component summation, and single-NV asymmetry).
+- Resolved MW field direction & frame alignment against `zenodo-data-set/Preprocessed_data.txt`:
+  - `(T, L, V)` aligned with `(X, Y, Z)` crystal axes and `B_lab` in the `(T, V)` plane (`B_lab = (0, 0, 1)` along `V`) matches Position 25 (`spectra[:, 24]`) directly; `B_lab` along `L` or `T`, or 45-deg crystal rotations, gave substantially worse fits or mismatched strain values.
+  - Under `B_lab = (0, 0, 1)` with shared amplitude (`equal_A=True`), `eps_TV -> -eps_TV` swaps `(NV1, NV3) <-> (NV2, NV4)` identically, explaining the paper's `±8.4e-5` sign ambiguity and why NV1/NV3 and NV2/NV4 overlap in `milestone_fit_pos25.png`.
+- Implemented `src/fitting.py` (`load_preprocessed_data`, `make_tlv_strain_tensor`, `fit_spectrum` via variable-projection `scipy.optimize.least_squares`), `tests/test_fitting.py`, and `scripts/fit_milestone.py`.
+- Milestone results at Position 25 (2.49 um):
+  - Paper reported: `eps_TT=-103.9e-5`, `eps_VV=-27.1e-5`, `eps_TV=±8.4e-5`, `D=2.86670 GHz`
+  - Fit (`D=2.86670` fixed): `eps_TT=-103.29e-5`, `eps_VV=-29.61e-5`, `eps_TV=±8.20e-5`, `rmse=0.00240`
+  - Fit (`D` free): `eps_TT=-98.02e-5`, `eps_VV=-17.34e-5`, `eps_TV=±9.51e-5`, `D=2.86760 GHz`, `rmse=0.00213` (single-position `D` vs hydrostatic `M_z` trace trade-off)
+- Verification: `pytest -v` -> 16 passed; `milestone_fit_pos25.png` visually confirmed.
