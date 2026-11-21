@@ -46,16 +46,38 @@ def test_fit_spectrum_synthetic_roundtrip():
     assert np.isclose(abs(res_free.eps_TV), abs(true_eTV), atol=1e-6)
 
 
-def test_fit_zenodo_milestone_position25():
+def test_fit_zenodo_mapped_positions():
     freqs, spectra = load_preprocessed_data()
     assert spectra.shape[1] == 47
-    y25 = spectra[:, 24]  # Position 25 (2.49 um center)
 
-    res = fit_spectrum(
-        freqs, y25, B_lab=(0.0, 0.0, 1.0), D_init=2.86670, fit_D=False, equal_A=True
+    # Position 24 (col index 23) = Table II position no. 23 (0.0 um, Fig. 4 center)
+    res24 = fit_spectrum(
+        freqs, spectra[:, 23], B_lab=(0.0, 0.0, 1.0), D_init=2.8670, fit_D=True, equal_A=True
     )
-    assert res.success
-    assert res.rmse < 0.003
-    assert abs(res.eps_TT - (-103.9e-5)) < 3e-5
-    assert abs(res.eps_VV - (-27.1e-5)) < 4e-5
-    assert abs(abs(res.eps_TV) - 8.4e-5) < 2e-5
+    assert res24.success
+    assert res24.rmse < 0.003
+    assert abs(res24.eps_TT - (-103.94e-5)) < 4e-5
+    assert abs(res24.eps_VV - (-27.13e-5)) < 3e-5
+    assert abs(abs(res24.eps_TV) - 8.4e-5) < 3e-5
+    assert abs(res24.D - 2.867) < 0.001
+
+    # Position 25 (col index 24) = Table II position no. 24 (0.83 um)
+    res25 = fit_spectrum(
+        freqs, spectra[:, 24], B_lab=(0.0, 0.0, 1.0), D_init=2.8670, fit_D=True, equal_A=True
+    )
+    assert res25.success
+    assert res25.rmse < 0.003
+    assert abs(res25.eps_TT - (-98.83e-5)) < 2e-5
+    assert abs(res25.eps_VV - (-17.28e-5)) < 2e-5
+    assert abs(res25.D - 2.8676) < 0.0005
+
+    # Position 27 (col index 26) = Table II position no. 26 (2.49 um)
+    res27 = fit_spectrum(
+        freqs, spectra[:, 26], B_lab=(0.0, 0.0, 1.0), D_init=2.8670, fit_D=True, equal_A=True
+    )
+    assert res27.success
+    assert res27.rmse < 0.003
+    assert abs(res27.eps_TT - (-100.98e-5)) < 4e-5
+    assert abs(res27.eps_VV - (-11.38e-5)) < 3e-5
+    assert abs(abs(res27.eps_TV) - 15.09e-5) < 3e-5
+    assert abs(res27.D - 2.8686) < 0.0005
